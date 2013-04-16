@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_login"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/login"
+        />
+    
+    <item
+        android:id="@+id/action_logout"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/logout"
+        />
+    
+    <item
+        android:id="@+id/action_MakeSchedule"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/makeschedule"
+        />
+    
+    <item
+        android:id="@+id/menu_new_task"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="테스크만들기"
+        />
+    
+	<item
+        android:id="@+id/action_close"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/close"
+        />
+    
+</menu>
