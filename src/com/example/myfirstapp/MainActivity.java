@@ -1,42 +1,33 @@
 package com.example.myfirstapp;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gcm.GCMBaseIntentService;
-import com.google.android.gcm.GCMRegistrar;
 import com.savagelook.android.UrlJsonAsyncTask;
 
 public class MainActivity extends Activity{
 	public final static String EXTRA_MESSAGE = "com.example.myfirstapp.Message";
 
-	private static final String TASKS_URL = "http://192.168.0.74:3000/api/v1/posts.json";
-	private static final String GCM_URL = "http://192.168.0.74:3000/api/v1/gcms.json";
+	private static final String TASKS_URL = "http://"+ServerIp.IP+"/api/v1/posts.json";
+	private static final String GCM_URL = "http://"+ServerIp.IP+"/api/v1/gcms.json";
 	
 	private SharedPreferences mPreferences;
 	
@@ -57,22 +48,22 @@ public class MainActivity extends Activity{
 	   				| ActionBar.DISPLAY_SHOW_HOME);
 		}
 		
-		loadGCMSendIdToServer(GCM_URL);
-		
 		mPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
 	}
 	
 	@Override
 	public void onResume() {
 	    super.onResume();
-
-	    if ( mPreferences.contains("AuthToken")) {
-	        loadTasksFromAPI(TASKS_URL);
-	    } else {
-	    	Intent intent = new Intent(MainActivity.this, SignInActivity.class);
-	    	// http://blog.naver.com/PostView.nhn?blogId=hisukdory&logNo=50088038280
-	        startActivityForResult(intent, 0);
-	    }
+	    
+	    loadTasksFromAPI(TASKS_URL);
+//	    if ( mPreferences.contains("AuthToken")) {
+//	        loadTasksFromAPI(TASKS_URL);
+//	    } else {
+//	    	Intent intent = new Intent(MainActivity.this, SignInActivity.class);
+//	    	// http://blog.naver.com/PostView.nhn?blogId=hisukdory&logNo=50088038280
+//	        startActivityForResult(intent, 0);
+//	        finish();
+//	    }
 	}
 
 	@Override
@@ -83,18 +74,13 @@ public class MainActivity extends Activity{
 		if ( mPreferences.contains("AuthToken")) {
 			menu.findItem(R.id.action_logout).setVisible(true);
 	   		menu.findItem(R.id.action_login).setVisible(false);
+	    }else{
+	    	menu.findItem(R.id.action_logout).setVisible(false);
+	   		menu.findItem(R.id.action_login).setVisible(true);
 	    }
 		return true;
 	}
 
-//	public void sendMessage(View view){
-//		Intent intent = new Intent(this, MakeScheduleActivity.class);
-//		EditText editText = (EditText) findViewById(R.id.edit_message);
-//		String message = editText.getText().toString();
-//		intent.putExtra(EXTRA_MESSAGE,  message);
-//		startActivity(intent);
-//	}
-	
 	@Override
 	  public boolean onOptionsItemSelected(MenuItem item) {
 	    switch (item.getItemId()) {
@@ -109,9 +95,10 @@ public class MainActivity extends Activity{
 	        // the SharedPreferences
 	        editor.clear();
 	        editor.commit();
+	        
 	        Intent logoutIntent = new Intent(this, SignInActivity.class);
-	        logoutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(logoutIntent);
+			finish();
 			break;
 	      
 	    case R.id.action_MakeSchedule:
@@ -122,41 +109,40 @@ public class MainActivity extends Activity{
 	    case R.id.menu_new_task:
 	        Intent intent = new Intent(MainActivity.this, NewPostActivity.class);
 	        startActivityForResult(intent, 0);
-	        return true;
+	        break;
+	        
+	    case R.id.menu_Settings:
+	    	Intent settingsIntent = new Intent(this, SettingActivity.class);
+	    	startActivity(settingsIntent);
+	    	break;
 	    	
-	    case R.id.action_close:
-	    	final Context context = this;
-	    	Builder d = new AlertDialog.Builder(this);
-			d.setMessage("정말 종료하시겠습니까?");
-			d.setPositiveButton("예", new DialogInterface.OnClickListener() {
-
-				public void onClick(DialogInterface dialog, int which) {
-					// process 전체 종료
-					Intent intent_close = new Intent(context, CloseActivity.class);
-					intent_close.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent_close.putExtra("close", true);
-					context.startActivity(intent_close);
-					((Activity) context).finish();
-					dialog.dismiss();
-				}
-			});
-			d.setNegativeButton("아니요", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.cancel();
-				}
-			});
-			d.show();
-			break;
+//	    case R.id.action_close:
+//	    	final Context context = this;
+//	    	Builder d = new AlertDialog.Builder(this);
+//			d.setMessage("정말 종료하시겠습니까?");
+//			d.setPositiveButton("예", new DialogInterface.OnClickListener() {
+//
+//				public void onClick(DialogInterface dialog, int which) {
+//					// process 전체 종료
+//					Intent intent_close = new Intent(context, CloseActivity.class);
+//					intent_close.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//					intent_close.putExtra("close", true);
+//					context.startActivity(intent_close);
+//					((Activity) context).finish();
+//					dialog.dismiss();
+//				}
+//			});
+//			d.setNegativeButton("아니요", new DialogInterface.OnClickListener() {
+//				public void onClick(DialogInterface dialog, int which) {
+//					dialog.cancel();
+//				}
+//			});
+//			d.show();
+//			break;
 	    }
 	    
 	    return true;
 	  }
-	
-	private void loadGCMSendIdToServer(String url) {
-		GCMSendIdToServer sendIdToServer = new GCMSendIdToServer(MainActivity.this);
-		sendIdToServer.setMessageLoading("Loading ...");
-		sendIdToServer.execute(url);
-	}
 
 	private void loadTasksFromAPI(String url) {
 	    GetTasksTask getTasksTask = new GetTasksTask(MainActivity.this);
@@ -180,14 +166,14 @@ public class MainActivity extends Activity{
 
 		        for (int i = 0; i < length; i++) {
 		          jsonTask = jsonTasks.getJSONObject(i);
-		          tasksArray.add(new Post(jsonTask.getLong("id"), jsonTask.getString("title"), jsonTask.getString("category"), jsonTask.getString("description")));
+		          tasksArray.add(new Post(jsonTask.getInt("id"), jsonTask.getString("title"), jsonTask.getString("category"), jsonTask.getString("description")));
 		        }
 
 		        ListView tasksListView = (ListView) findViewById (R.id.tasks_list_view);
 		        if (tasksListView != null) {
-		          tasksListView.setAdapter(new PostAdapter(MainActivity.this,
-		              android.R.layout.simple_list_item_1, tasksArray));
+		          tasksListView.setAdapter(new PostAdapter(MainActivity.this, tasksArray));
 		        }
+		        tasksListView.setOnItemClickListener(new TasklistListener());
 		      } catch (Exception e) {
 		      Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
 		    } finally {
@@ -206,36 +192,47 @@ public class MainActivity extends Activity{
 	    startActivity(startMain);
 	    finish();
 	}
+//	
+//	private class PostAdapter extends ArrayAdapter<Post>{
+//
+//		  private ArrayList<Post> items;
+//		  private int layoutResourceId;
+//
+//		  @Override
+//		  public View getView(int position, View convertView, ViewGroup parent) {
+//		    View view = convertView;
+//		      if (view == null) {
+//		        LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//		        view = (TextView) layoutInflater.inflate(layoutResourceId, null);
+//		      }
+//		      Post task = items.get(position);
+//		      if (task != null) {
+//		        TextView postTextView = (TextView) view.findViewById(android.R.id.text1);
+//		          if (postTextView != null) {
+//		        	postTextView.setText(task.getCategory());
+//			        postTextView.setText(task.getDescription());  
+//		            postTextView.setText(task.getTitle());
+//		          }
+//		          view.setTag(task.getId());
+//		      }
+//		      return view;
+//		  }
+//	}
 	
-	private class PostAdapter extends ArrayAdapter<Post>{
+	private class TasklistListener implements OnItemClickListener {
 
-		  private ArrayList<Post> items;
-		  private int layoutResourceId;
-
-		  public PostAdapter(Context context, int layoutResourceId, ArrayList<Post> items) {
-		    super(context, layoutResourceId, items);
-		    this.layoutResourceId = layoutResourceId;
-		    this.items = items;
-		  }
-
-		  @Override
-		  public View getView(int position, View convertView, ViewGroup parent) {
-		    View view = convertView;
-		      if (view == null) {
-		        LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		        view = (TextView) layoutInflater.inflate(layoutResourceId, null);
-		      }
-		      Post task = items.get(position);
-		      if (task != null) {
-		        TextView postTextView = (TextView) view.findViewById(android.R.id.text1);
-		          if (postTextView != null) {
-		        	postTextView.setText(task.getCategory());
-			        postTextView.setText(task.getDescription());  
-		            postTextView.setText(task.getTitle());
-		          }
-		          view.setTag(task.getId());
-		      }
-		      return view;
-		  }
+		@Override
+		public void onItemClick(AdapterView<?> parentView, View v,
+				int position, long id) {
+			Post post = (Post) parentView.getItemAtPosition(position);
+			
+			Intent intent = new Intent(parentView.getContext(), PostShow.class);
+			intent.putExtra("title", post.getTitle());
+			intent.putExtra("description", post.getDescription());
+//			Toast.makeText(parentView.getContext(), String.valueOf(post.getId()),2000).show();
+			intent.putExtra("post_id", post.getId());
+			startActivity(intent);
+			
+		}
 	}
 }

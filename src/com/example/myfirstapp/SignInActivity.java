@@ -13,10 +13,7 @@ import org.json.JSONObject;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -33,7 +30,7 @@ import com.savagelook.android.UrlJsonAsyncTask;
 
 public class SignInActivity extends Activity {
 
-	private final static String LOGIN_API_ENDPOINT_URL = "http://192.168.0.74:3000/api/v1/sessions.json";
+	private final static String LOGIN_API_ENDPOINT_URL = "http://"+ServerIp.IP+"/api/v1/sessions.json";
 	private SharedPreferences mPreferences;
 	private String mUserName;
 	private String mUserPassword;
@@ -71,34 +68,33 @@ public class SignInActivity extends Activity {
 	    	Intent registerIntent = new Intent(this, RegisterActivity.class);
 			startActivity(registerIntent);
 			break;
-	    case R.id.action_close:
-	    	final Context context = this;
-	    	Builder d = new AlertDialog.Builder(this);
-			d.setMessage("정말 종료하시겠습니까?");
-			d.setPositiveButton("예", new DialogInterface.OnClickListener() {
-
-				public void onClick(DialogInterface dialog, int which) {
-					// process 전체 종료
-					Intent intent_close = new Intent(context, CloseActivity.class);
-					intent_close.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent_close.putExtra("close_signin", true);
-					context.startActivity(intent_close);
-					((Activity) context).finish();
-					dialog.dismiss();
-				}
-			});
-			d.setNegativeButton("아니요", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.cancel();
-				}
-			});
-			d.show();
-			break;
+//	    case R.id.action_close:
+//	    	final Context context = this;
+//	    	Builder d = new AlertDialog.Builder(this);
+//			d.setMessage("정말 종료하시겠습니까?");
+//			d.setPositiveButton("예", new DialogInterface.OnClickListener() {
+//
+//				public void onClick(DialogInterface dialog, int which) {
+//					// process 전체 종료
+//					Intent intent_close = new Intent(context, CloseActivity.class);
+//					intent_close.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//					intent_close.putExtra("close_signin", true);
+//					context.startActivity(intent_close);
+//					((Activity) context).finish();
+//					dialog.dismiss();
+//				}
+//			});
+//			d.setNegativeButton("아니요", new DialogInterface.OnClickListener() {
+//				public void onClick(DialogInterface dialog, int which) {
+//					dialog.cancel();
+//				}
+//			});
+//			d.show();
+//			break;
 	    }
 
 	    return true;
 	  }
-	
 	
 	public void login(View button) {
 	    EditText userEmailField = (EditText) findViewById(R.id.userEmail);
@@ -116,6 +112,7 @@ public class SignInActivity extends Activity {
 	        loginTask.setMessageLoading("Logging in...");
 	        loginTask.setAuthToken(mPreferences.getString("AuthToken", ""));
 	        loginTask.execute(LOGIN_API_ENDPOINT_URL);
+	        finish();
 	    }
 	}
 	
@@ -182,8 +179,9 @@ public class SignInActivity extends Activity {
 	                // save the returned auth_token into
 	                // the SharedPreferences
 	                editor.putString("AuthToken", json.getJSONObject("data").getString("auth_token"));
+	                editor.putString("UserName", mUserName);
 	                editor.commit();
-
+	                
 	                // launch the HomeActivity and close this one
 	                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 	                startActivity(intent);

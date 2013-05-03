@@ -26,14 +26,21 @@
         android:id="@+id/menu_new_task"
         android:orderInCategory="100"
         android:showAsAction="never"
-        android:title="테스크만들기"
+        android:title="글쓰기"
         />
     
-	<item
+    <item
+        android:id="@+id/menu_Settings"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="환경설정"
+        />
+    
+<!-- 	<item
         android:id="@+id/action_close"
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/close"
-        />
+        /> -->
     
 </menu>

@@ -1,23 +1,23 @@
 package com.example.myfirstapp;
 
 public class Post {
-	private long id;
+	private int id;
 	private String title;
 	private String category;
 	private String description;
 
-	public Post(long id, String title, String category, String description) {
+	public Post(int id, String title, String category, String description) {
 		this.id = id;
 		this.title = title;
 		this.category = category;
 		this.description = description;
 	}
 
-	public long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 

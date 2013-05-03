@@ -1,6 +1,8 @@
 package com.example.myfirstapp;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
@@ -21,19 +23,26 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.savagelook.android.UrlJsonAsyncTask;
 
 public class RegisterActivity extends Activity {
 
-	private final static String REGISTER_API_ENDPOINT_URL = "http://192.168.0.74:3000/api/v1/registrations";
+	private final static String REGISTER_API_ENDPOINT_URL = "http://"+ServerIp.IP+"/api/v1/registrations";
 	private SharedPreferences mPreferences;
 	private String mUserEmail;
 	private String mUserName;
 	private String mUserPassword;
 	private String mUserPasswordConfirmation;
+	private String mPhone_first;
+	private String mPhone_second;
+	private String mPhone_third;
+	
+	private Spinner phoneSelect;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -41,6 +50,8 @@ public class RegisterActivity extends Activity {
 	    setContentView(R.layout.activity_register);
 
 	    mPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
+	    
+	    addItemsOnSpinner();
 	    
 	    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
 			getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -69,6 +80,12 @@ public class RegisterActivity extends Activity {
 	    mUserPassword = userPasswordField.getText().toString();
 	    EditText userPasswordConfirmationField = (EditText) findViewById(R.id.userPasswordConfirmation);
 	    mUserPasswordConfirmation = userPasswordConfirmationField.getText().toString();
+	    Spinner userPhoneField = (Spinner) findViewById(R.id.phone_first);
+	    mPhone_first = String.valueOf(userPhoneField.getSelectedItem());
+	    EditText userPhoneSecondField = (EditText) findViewById(R.id.phone_second);
+	    mPhone_second = String.valueOf(userPhoneSecondField.getText().toString());
+	    EditText userPhoneThirdField = (EditText) findViewById(R.id.phone_third);
+	    mPhone_third = String.valueOf(userPhoneThirdField.getText().toString());
 
 	    if (mUserEmail.length() == 0 || mUserName.length() == 0 || mUserPassword.length() == 0 || mUserPasswordConfirmation.length() == 0) {
 	        // input fields are empty
@@ -116,6 +133,10 @@ public class RegisterActivity extends Activity {
 	                userObj.put("name", mUserName);
 	                userObj.put("password", mUserPassword);
 	                userObj.put("password_confirmation", mUserPasswordConfirmation);
+	                userObj.put("phone_first", mPhone_first);
+	                userObj.put("phone_second", mPhone_second);
+	                userObj.put("phone_third", mPhone_third);
+	                userObj.put("phone", mPhone_first+mPhone_second+mPhone_third);
 	                holder.put("user", userObj);
 	                StringEntity se = new StringEntity(holder.toString());
 	                post.setEntity(se);
@@ -169,5 +190,25 @@ public class RegisterActivity extends Activity {
 	        }
 	    }
 	}
+	
+	public void addItemsOnSpinner(){
+		  phoneSelect = (Spinner) findViewById(R.id.phone_first);
+		  List<String> list = new ArrayList<String>();
+		  list.add("010");
+		  list.add("011");
+		  list.add("016");
+		  list.add("017");
+		  list.add("018");
+		  list.add("019");
+		  list.add("견적 의뢰");
+		  ArrayAdapter<String> phoneSelectAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, list);
+		  phoneSelectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		  phoneSelect.setAdapter(phoneSelectAdapter);
+	  }
+	  
+	  public void addListenerOnSpinnerItemSelection(){
+		  phoneSelect = (Spinner) findViewById(R.id.phone_first);
+		  phoneSelect.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+	  }
 
 }

@@ -12,17 +12,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gcm.GCMRegistrar;
-import com.google.android.gcm.GCMBaseIntentService;
 import com.savagelook.android.UrlJsonAsyncTask;
 
 public class GCMSendIdToServer extends UrlJsonAsyncTask {
+	private SharedPreferences mPreferences;
+	
     public GCMSendIdToServer(Context context) {
       super(context);
+      
+      mPreferences = context.getSharedPreferences("CurrentUser", context.MODE_PRIVATE);
       
       GCMRegistrar.checkDevice(context);
       GCMRegistrar.checkManifest(context);
@@ -32,6 +35,11 @@ public class GCMSendIdToServer extends UrlJsonAsyncTask {
       } else {
     	  Log.v("[GCM]", "Already registered" + regId);
       }
+      SharedPreferences.Editor editor = mPreferences.edit();
+      // save the returned auth_token into
+      // the SharedPreferences
+	  editor.putString("regid", regId);
+	  editor.commit();
     }
 
     @Override
@@ -48,7 +56,9 @@ public class GCMSendIdToServer extends UrlJsonAsyncTask {
         try {
           json.put("success", false);
           json.put("info", "Something went wrong. Retry!");
-          taskObj.put("reg_id", regId);
+          taskObj.put("reg_id", mPreferences.getString("regid", "X"));
+          taskObj.put("noty", mPreferences.getBoolean("noty", true));
+          taskObj.put("userName", mPreferences.getString("UserName", "X"));
           
           holder.put("gcm", taskObj);
           StringEntity se = new StringEntity(holder.toString(), "utf-8");
